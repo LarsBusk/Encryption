@@ -22,7 +22,6 @@ namespace EncryptDecrypt
     public MainForm()
     {
       InitializeComponent();
-      helper = new DataFileHelper();
     }
 
     private void btnBrowse_Click(object sender, EventArgs e)
@@ -50,7 +49,8 @@ namespace EncryptDecrypt
       }
       else
       {
-        List<SampleContent> samples = helper.GetSamples(fileName);
+        helper = new DataFileHelper(fileName);
+        List<SampleContent> samples = helper.GetSamples();
         string destinationfolder = Path.Combine(Path.GetDirectoryName(fileName), "DecryptedRawFiles");
 
         if (!Directory.Exists(destinationfolder))
@@ -67,13 +67,12 @@ namespace EncryptDecrypt
           foreach (var sampleRawDataContent in sample.RawDataContents)
           {
             string extention = sampleRawDataContent.Identification.Equals("JpegPicture") ? "jpeg" : "xml";
-            string decryptedFileName = sampleRawDataContent.IsSubSample
-              ? $"{sampleRawDataContent.Identification}_{sampleNumber}_Sub_{sampleRawDataContent.RawDataNumber}.{extention}"
-              : $"{sampleRawDataContent.Identification}_{sampleNumber}.{extention}";
-            string decryptedFilePathName =   Path.Combine(destinationfolder, decryptedFileName);
+            string decryptedFileName = $"{sample}_{sampleRawDataContent}.{extention}";
+            string decryptedFilePathName = Path.Combine(destinationfolder, decryptedFileName);
             string readFileName = Path.Combine(Path.GetDirectoryName(fileName), sampleRawDataContent.DataFileName);
 
-            if (sampleRawDataContent.Identification.Equals("JpegPicture")|| sampleRawDataContent.Identification.Equals("ForeignObjectData"))
+            if (sampleRawDataContent.Identification.Equals("JpegPicture") ||
+                sampleRawDataContent.Identification.Equals("ForeignObjectData"))
             {
               File.Copy(readFileName, decryptedFilePathName, true);
               rtbResult.AppendText($"{decryptedFileName} was copied\n");
@@ -81,6 +80,22 @@ namespace EncryptDecrypt
             else if (DecryptSingleFile(decryptedFilePathName, readFileName))
             {
               rtbResult.AppendText($"{decryptedFileName}.xml succesfully decrypted.\n");
+            }
+          }
+        }
+
+        var settingFiles = helper.SettingsFileList();
+
+        foreach (var settingFile in settingFiles)
+        {
+          string readFileName = Path.Combine(Path.GetDirectoryName(fileName), settingFile.Item1, settingFile.Item2);
+          string decryptedFileName = Path.Combine(destinationfolder, settingFile.Item2 + ".xml");
+
+          if (File.Exists(readFileName))
+          {
+            if (DecryptSingleFile(decryptedFileName, readFileName))
+            {
+              rtbResult.AppendText($"{settingFile} was successfully decrypted.\n");
             }
           }
         }

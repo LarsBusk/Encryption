@@ -34,7 +34,7 @@ namespace EncryptDecrypt
 
     public override string ToString()
     {
-      return this.IsSubSample ? $"Sample_{SampleNumber}_SubSample" : $"Sample_{SampleNumber}";
+      return this.IsSubSample ? $"Sample_{SampleNumber}_SubSample_{SubSampleNumber}" : $"Sample_{SampleNumber}";
     }
   }
 }

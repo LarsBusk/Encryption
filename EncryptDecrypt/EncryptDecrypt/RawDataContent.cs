@@ -33,7 +33,7 @@ namespace EncryptDecrypt
 
     public override string ToString()
     {
-      return base.ToString();
+      return $"{Identification}_{RawDataNumber}";
     }
   }
 }
