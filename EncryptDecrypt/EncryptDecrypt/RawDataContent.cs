@@ -18,16 +18,13 @@ namespace EncryptDecrypt
 
     public string PathName { get; }
 
-    public bool IsSubSample { get; }
-
     public int RawDataNumber { get; set; }
 
-    public RawDataContent(string identification, string dataFileName, string pathName, bool isSubSample, int rawDataNumber = 0)
+    public RawDataContent(string identification, string dataFileName, string pathName, int rawDataNumber = 0)
     {
       this.Identification = identification;
       this.DataFileName = Path.Combine(pathName, dataFileName);
       this.PathName = pathName;
-      this.IsSubSample = isSubSample;
       this.RawDataNumber = rawDataNumber;
     }
 

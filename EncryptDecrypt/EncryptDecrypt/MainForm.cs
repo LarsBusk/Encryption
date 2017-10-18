@@ -9,6 +9,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using FOSS.Nova.Common.DataAccess.SettingsAccessors.InstrumentSettings;
 using FOSS.Nova.Common.Encryption;
 
 namespace EncryptDecrypt
@@ -16,6 +17,8 @@ namespace EncryptDecrypt
   public partial class MainForm : Form
   {
     private string fileName;
+
+    private string destinationfolder;
 
     private DataFileHelper helper;
 
@@ -37,6 +40,8 @@ namespace EncryptDecrypt
 
     private void btnDecryptAndSave_Click(object sender, EventArgs e)
     {
+      rtbResult.Clear();
+
       if (rbSingleFile.Checked)
       {
         SaveFileDialog dialog = new SaveFileDialog();
@@ -44,59 +49,71 @@ namespace EncryptDecrypt
 
         if (dialog.ShowDialog() != DialogResult.Cancel)
         {
-          DecryptSingleFile(dialog.FileName, fileName);
+          if (DecryptSingleFile(dialog.FileName, fileName))
+          {
+            rtbResult.AppendText($"{fileName} was successfully decrypted and saved as {dialog.FileName}.");
+          }
         }
       }
       else
       {
         helper = new DataFileHelper(fileName);
-        List<SampleContent> samples = helper.GetSamples();
-        string destinationfolder = Path.Combine(Path.GetDirectoryName(fileName), "DecryptedRawFiles");
+        destinationfolder = Path.Combine(Path.GetDirectoryName(fileName), "DecryptedRawFiles");
+        DecryptSamplesFromDataFile();
+        DecryptSettingsFilesFromDataFile();
+      }
+    }
 
-        if (!Directory.Exists(destinationfolder))
+    private void DecryptSamplesFromDataFile()
+    {
+      List<SampleContent> samples = helper.GetSamples();
+
+      if (!Directory.Exists(destinationfolder))
+      {
+        Directory.CreateDirectory(destinationfolder);
+      }
+
+      int sampleNumber = 0;
+
+      foreach (var sample in samples)
+      {
+        sampleNumber++;
+
+        foreach (var sampleRawDataContent in sample.RawDataContents)
         {
-          Directory.CreateDirectory(destinationfolder);
-        }
+          string extention = sampleRawDataContent.Identification.Equals("JpegPicture") ? "jpeg" : "xml";
+          string decryptedFileName = $"{sample}_{sampleRawDataContent}.{extention}";
+          string decryptedFilePathName = Path.Combine(destinationfolder, decryptedFileName);
+          string readFileName = Path.Combine(Path.GetDirectoryName(fileName), sampleRawDataContent.DataFileName);
 
-        int sampleNumber = 0;
-
-        foreach (var sample in samples)
-        {
-          sampleNumber++;
-
-          foreach (var sampleRawDataContent in sample.RawDataContents)
+          if (sampleRawDataContent.Identification.Equals("JpegPicture") ||
+              sampleRawDataContent.Identification.Equals("ForeignObjectData"))
           {
-            string extention = sampleRawDataContent.Identification.Equals("JpegPicture") ? "jpeg" : "xml";
-            string decryptedFileName = $"{sample}_{sampleRawDataContent}.{extention}";
-            string decryptedFilePathName = Path.Combine(destinationfolder, decryptedFileName);
-            string readFileName = Path.Combine(Path.GetDirectoryName(fileName), sampleRawDataContent.DataFileName);
-
-            if (sampleRawDataContent.Identification.Equals("JpegPicture") ||
-                sampleRawDataContent.Identification.Equals("ForeignObjectData"))
-            {
-              File.Copy(readFileName, decryptedFilePathName, true);
-              rtbResult.AppendText($"{decryptedFileName} was copied\n");
-            }
-            else if (DecryptSingleFile(decryptedFilePathName, readFileName))
-            {
-              rtbResult.AppendText($"{decryptedFileName}.xml succesfully decrypted.\n");
-            }
+            File.Copy(readFileName, decryptedFilePathName, true);
+            rtbResult.AppendText($"{decryptedFileName} was copied\n");
+          }
+          else if (DecryptSingleFile(decryptedFilePathName, readFileName))
+          {
+            rtbResult.AppendText($"{decryptedFileName}.xml succesfully decrypted.\n");
           }
         }
+      }
+    }
 
-        var settingFiles = helper.SettingsFileList();
+    private void DecryptSettingsFilesFromDataFile()
+    {
+      var settingFiles = helper.SettingsFileList();
 
-        foreach (var settingFile in settingFiles)
+      foreach (var settingFile in settingFiles)
+      {
+        string readFileName = Path.Combine(Path.GetDirectoryName(fileName), settingFile.Item1, settingFile.Item2);
+        string decryptedFileName = Path.Combine(destinationfolder, settingFile.Item2 + ".xml");
+
+        if (File.Exists(readFileName))
         {
-          string readFileName = Path.Combine(Path.GetDirectoryName(fileName), settingFile.Item1, settingFile.Item2);
-          string decryptedFileName = Path.Combine(destinationfolder, settingFile.Item2 + ".xml");
-
-          if (File.Exists(readFileName))
+          if (DecryptSingleFile(decryptedFileName, readFileName))
           {
-            if (DecryptSingleFile(decryptedFileName, readFileName))
-            {
-              rtbResult.AppendText($"{settingFile} was successfully decrypted.\n");
-            }
+            rtbResult.AppendText($"{settingFile} was successfully decrypted.\n");
           }
         }
       }
