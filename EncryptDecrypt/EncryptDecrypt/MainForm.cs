@@ -55,6 +55,15 @@ namespace EncryptDecrypt
           }
         }
       }
+      else if (rbBlackBox.Checked)
+      {
+        SaveFileDialog dialog = new SaveFileDialog();
+        dialog.Filter = "Text files|*.txt";
+        if (dialog.ShowDialog() != DialogResult.Cancel)
+        {
+          Decompress(dialog.FileName, fileName);
+        }
+      }
       else
       {
         helper = new DataFileHelper(fileName);
@@ -91,6 +100,10 @@ namespace EncryptDecrypt
           {
             File.Copy(readFileName, decryptedFilePathName, true);
             rtbResult.AppendText($"{decryptedFileName} was copied\n");
+          }
+          else if (sampleRawDataContent.Identification.Equals("ABS_SCAN"))
+          {
+            Decompress(decryptedFilePathName, readFileName);
           }
           else if (DecryptSingleFile(decryptedFilePathName, readFileName))
           {
@@ -130,6 +143,37 @@ namespace EncryptDecrypt
       }
 
       return false;
+    }
+
+    private bool DecryptBlackBoxFile(string decryptedFileName, string readFileName)
+    {
+      byte[] encBytes = File.ReadAllBytes(readFileName);
+      byte[] decBytes = DecryptionHelper.DecryptBlackBoxData(encBytes);
+
+      if (decBytes != null)
+      {
+        File.WriteAllBytes(decryptedFileName, decBytes);
+        return true;
+      }
+
+      return false;
+    }
+
+    private void Decompress(string decryptedFileName, string readFileName)
+    {
+      var floats = DecrompressionHelper.Decompress(readFileName);
+
+      StringBuilder builder = new StringBuilder();
+
+      foreach (var f in floats)
+      {
+        builder.Append(f.ToString());
+        builder.Append(";");
+      }
+
+      string[] writeStrings = new[] {builder.ToString()};
+
+      File.WriteAllLines(decryptedFileName, writeStrings);
     }
   }
 }

@@ -13,6 +13,11 @@ namespace EncryptDecrypt
 {
   public static class DecryptionHelper
   {
+    public static byte[] DecryptBlackBoxData(byte[] encryptedBytes)
+    {
+      return Asymmetric.Decrypt(encryptedBytes);
+    }
+
     public static byte[] DecryptFile(byte[] encryptedData)
     {
       if (encryptedData == null)
