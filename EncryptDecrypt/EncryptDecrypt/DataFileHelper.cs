@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using FOSS.Nova.Common.DataAccess.SettingsAccessors;
 
 namespace EncryptDecrypt
 {
@@ -18,10 +19,18 @@ namespace EncryptDecrypt
 
     private readonly XElement sampleGroups;
 
+    private readonly XElement selfTests;
+
     public DataFileHelper(string dataFileName)
     {
       var data = XDocument.Load(dataFileName);
       sampleGroups = data.Element(ns + "Instruments").Element(ns + "Instrument").Element(ns + "SampleGroups");
+    }
+
+    public DataFileHelper(string datafileName, bool isTestFile)
+    {
+      var data = XDocument.Load(datafileName);
+      selfTests = data.Element(ns + "InstrumentElements").Element(ns + "Instrument").Element(ns + "SelfTests");
     }
 
     /// <summary>
@@ -74,13 +83,43 @@ namespace EncryptDecrypt
       return samples;
     }
 
+    public List<SelfTestContent> GetSelfTests()
+    {
+      List<SelfTestContent> selfTestElements = new List<SelfTestContent>();
+
+      var selfTestSteps = selfTests.Elements(ns + "SelfTest").Elements(ns + "SelfTestSteps")
+        .Elements(ns + "SelfTestStep");
+
+      foreach (var selfTestStep in selfTestSteps)
+      {
+        SelfTestContent step = new SelfTestContent(selfTestStep.Attribute("Name").Value,
+          selfTestStep.Attribute("Status").Value, selfTestStep.Attribute("StepNumber").Value);
+
+        var selfTestResults = selfTestStep.Elements(ns + "SelfTestResults").Elements(ns + "SelfTestResult");
+        int selfTestResultNumber = 0;
+
+        foreach (var selfTestResult in selfTestResults)
+        {
+          step.AddRawData(GetRawData(selfTestResult, selfTestResultNumber));
+          selfTestResultNumber++;
+        }
+
+        selfTestElements.Add(step);
+      }
+
+      return selfTestElements;
+    }
+
     /// <summary>
     /// Gets a list of files with settings.
     /// </summary>
     /// <returns></returns>
-    public List<Tuple<string, string>> SettingsFileList()
+    public List<Tuple<string, string>> SettingsFileList(bool isSelfTest)
     {
-      var settings = sampleGroups.Elements(ns + "SampleGroup").Elements(ns + "InstrumentExtensionList")
+      string settingGroup = isSelfTest ? "SelfTest" : "SampleGroup";
+      XElement group = isSelfTest ? selfTests : sampleGroups;
+
+      var settings = group.Elements(ns + settingGroup).Elements(ns + "InstrumentExtensionList")
         .Elements(ns + "InstrumentExtension")
         .Elements(ns + "SettingGroup").Elements(ns + "Setting")
         .Where(s => s.Attribute("DataType").Value.Equals("File"));
@@ -106,11 +145,12 @@ namespace EncryptDecrypt
       return files;
     }
 
-    private RawDataContent GetRawData(XElement rawDataElement)
+    private RawDataContent GetRawData(XElement rawDataElement, int rawDataNumber = 0)
     {
       return new RawDataContent(rawDataElement.Attribute("Identification").Value,
         rawDataElement.Element(ns + "RawDataFile").Attribute("FileName").Value,
-        rawDataElement.Element(ns + "RawDataFile").Attribute("PathName").Value);
+        rawDataElement.Element(ns + "RawDataFile").Attribute("PathName").Value,
+        rawDataNumber);
     }
   }
 }

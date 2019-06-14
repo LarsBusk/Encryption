@@ -13,12 +13,21 @@ namespace EncryptDecrypt
 {
   public static class DecryptionHelper
   {
-    public static byte[] DecryptBlackBoxData(byte[] encryptedBytes)
+
+    public static bool DecryptSingleFile(string decryptedFileName, string readFileName)
     {
-      return Asymmetric.Decrypt(encryptedBytes);
+      byte[] encBytes = File.ReadAllBytes(readFileName);
+      byte[] decBytes = DecryptFile(encBytes);
+      if (decBytes != null)
+      {
+        File.WriteAllBytes(decryptedFileName, decBytes);
+        return true;
+      }
+
+      return false;
     }
 
-    public static byte[] DecryptFile(byte[] encryptedData)
+    private static byte[] DecryptFile(byte[] encryptedData)
     {
       if (encryptedData == null)
       {
@@ -74,6 +83,20 @@ namespace EncryptDecrypt
       }
 
       return null;
+    }
+
+    public static bool DecryptBlackBoxFile(string decryptedFileName, string readFileName)
+    {
+      byte[] encryptedBytes = File.ReadAllBytes(readFileName);
+      byte[] decryptedBytes = Asymmetric.Decrypt(encryptedBytes);
+
+      if (decryptedBytes != null)
+      {
+        File.WriteAllBytes(decryptedFileName, decryptedBytes);
+        return true;
+      }
+
+      return false;
     }
   }
 }

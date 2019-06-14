@@ -136,7 +136,7 @@
             <param name="compressionLevel">Compression level used by Zlib library.</param>
             <returns>Stream with compressed data.</returns>
         </member>
-        <member name="M:Foss.Platform.IO.SignalCompression.Compression.Compressor.Decompress(System.IO.Stream,System.Int32)">
+        <member name="M:Foss.Platform.IO.SignalCompression.Compression.Compressor.Decompress(System.Byte[],System.Int32)">
             <summary>
             Decompresses data with Zlib library followed by deltas calculation
             to original values and transposing with Vertical Floats algorithm.
@@ -202,16 +202,22 @@
             array data multiplied to square bit-matrix side.
             </summary>
         </member>
-        <member name="F:Foss.Platform.IO.SignalCompression.Compression.FastTransposer.bitsBufferLength">
+        <member name="F:Foss.Platform.IO.SignalCompression.Compression.FastTransposer.BitsBufferLength">
             <summary>
             Length of array chunk to store bits vertically.
             </summary>
         </member>
-        <member name="M:Foss.Platform.IO.SignalCompression.Compression.FastTransposer.Restore(System.Byte[])">
+        <member name="F:Foss.Platform.IO.SignalCompression.Compression.FastTransposer.InitialSwapMask">
+            <summary>
+            Initial mask for bits swapping.
+            </summary>
+        </member>
+        <member name="M:Foss.Platform.IO.SignalCompression.Compression.FastTransposer.Restore(System.Byte[],System.Int32)">
             <summary>
             Arrange bits of byte array to horizontal floats representation.
             </summary>
             <param name="data">Source vertical arranged data.</param>
+            <param name="count">Count of elements in data array to use for restoring.</param>
             <returns>
             Transposed byte array to uints representation by Vertical Floats algorithm.
             </returns>
@@ -491,11 +497,13 @@
             Width in bits of array to store bits vertically.
             </summary>
         </member>
-        <member name="M:Foss.Platform.IO.SignalCompression.Transposer.Restore(System.Byte[])">
+        <member name="M:Foss.Platform.IO.SignalCompression.Transposer.Restore(System.Byte[],System.Int32,System.Int32)">
             <summary>
             Arrange bits of byte array to horizontal floats representation.
             </summary>
             <param name="data">Source vertical arraged data.</param>
+            <param name="startIndex">First element in array to start restoring data.</param>
+            <param name="endIndex">Last element index in data array to restore.</param>
             <returns>
             Transposed byte array to uints representation by Vertical Floats algorithm.
             </returns>

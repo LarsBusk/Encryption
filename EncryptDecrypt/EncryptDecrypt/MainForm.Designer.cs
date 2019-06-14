@@ -30,7 +30,8 @@
     {
       this.groupBox1 = new System.Windows.Forms.GroupBox();
       this.groupBox3 = new System.Windows.Forms.GroupBox();
-      this.radioButton2 = new System.Windows.Forms.RadioButton();
+      this.rbBlackBox = new System.Windows.Forms.RadioButton();
+      this.rbSampleExportFile = new System.Windows.Forms.RadioButton();
       this.rbSingleFile = new System.Windows.Forms.RadioButton();
       this.lblSelectedFile = new System.Windows.Forms.Label();
       this.rtbResult = new System.Windows.Forms.RichTextBox();
@@ -41,7 +42,7 @@
       this.cbEncryptionVersion = new System.Windows.Forms.ComboBox();
       this.btnEncryptAndSave = new System.Windows.Forms.Button();
       this.btnBrowseEnc = new System.Windows.Forms.Button();
-      this.rbBlackBox = new System.Windows.Forms.RadioButton();
+      this.rbSelfTestFile = new System.Windows.Forms.RadioButton();
       this.groupBox1.SuspendLayout();
       this.groupBox3.SuspendLayout();
       this.rbSampleExport.SuspendLayout();
@@ -63,27 +64,39 @@
       // 
       // groupBox3
       // 
+      this.groupBox3.Controls.Add(this.rbSelfTestFile);
       this.groupBox3.Controls.Add(this.rbBlackBox);
-      this.groupBox3.Controls.Add(this.radioButton2);
+      this.groupBox3.Controls.Add(this.rbSampleExportFile);
       this.groupBox3.Controls.Add(this.rbSingleFile);
       this.groupBox3.Location = new System.Drawing.Point(283, 131);
       this.groupBox3.Name = "groupBox3";
-      this.groupBox3.Size = new System.Drawing.Size(163, 113);
+      this.groupBox3.Size = new System.Drawing.Size(163, 129);
       this.groupBox3.TabIndex = 4;
       this.groupBox3.TabStop = false;
       this.groupBox3.Text = "Filetype";
       // 
-      // radioButton2
+      // rbBlackBox
       // 
-      this.radioButton2.AutoSize = true;
-      this.radioButton2.Checked = true;
-      this.radioButton2.Location = new System.Drawing.Point(14, 52);
-      this.radioButton2.Name = "radioButton2";
-      this.radioButton2.Size = new System.Drawing.Size(108, 17);
-      this.radioButton2.TabIndex = 1;
-      this.radioButton2.TabStop = true;
-      this.radioButton2.Text = "Sample export file";
-      this.radioButton2.UseVisualStyleBackColor = true;
+      this.rbBlackBox.AutoSize = true;
+      this.rbBlackBox.Location = new System.Drawing.Point(14, 75);
+      this.rbBlackBox.Name = "rbBlackBox";
+      this.rbBlackBox.Size = new System.Drawing.Size(86, 17);
+      this.rbBlackBox.TabIndex = 2;
+      this.rbBlackBox.TabStop = true;
+      this.rbBlackBox.Text = "BlackBox file";
+      this.rbBlackBox.UseVisualStyleBackColor = true;
+      // 
+      // rbSampleExportFile
+      // 
+      this.rbSampleExportFile.AutoSize = true;
+      this.rbSampleExportFile.Checked = true;
+      this.rbSampleExportFile.Location = new System.Drawing.Point(14, 52);
+      this.rbSampleExportFile.Name = "rbSampleExportFile";
+      this.rbSampleExportFile.Size = new System.Drawing.Size(108, 17);
+      this.rbSampleExportFile.TabIndex = 1;
+      this.rbSampleExportFile.TabStop = true;
+      this.rbSampleExportFile.Text = "Sample export file";
+      this.rbSampleExportFile.UseVisualStyleBackColor = true;
       // 
       // rbSingleFile
       // 
@@ -188,16 +201,16 @@
       this.btnBrowseEnc.Text = "Browse";
       this.btnBrowseEnc.UseVisualStyleBackColor = true;
       // 
-      // rbBlackBox
+      // rbSelfTestFile
       // 
-      this.rbBlackBox.AutoSize = true;
-      this.rbBlackBox.Location = new System.Drawing.Point(14, 75);
-      this.rbBlackBox.Name = "rbBlackBox";
-      this.rbBlackBox.Size = new System.Drawing.Size(86, 17);
-      this.rbBlackBox.TabIndex = 2;
-      this.rbBlackBox.TabStop = true;
-      this.rbBlackBox.Text = "BlackBox file";
-      this.rbBlackBox.UseVisualStyleBackColor = true;
+      this.rbSelfTestFile.AutoSize = true;
+      this.rbSelfTestFile.Location = new System.Drawing.Point(15, 98);
+      this.rbSelfTestFile.Name = "rbSelfTestFile";
+      this.rbSelfTestFile.Size = new System.Drawing.Size(108, 17);
+      this.rbSelfTestFile.TabIndex = 3;
+      this.rbSelfTestFile.TabStop = true;
+      this.rbSelfTestFile.Text = "Selftest export file";
+      this.rbSelfTestFile.UseVisualStyleBackColor = true;
       // 
       // MainForm
       // 
@@ -231,9 +244,10 @@
     private System.Windows.Forms.Button btnEncryptAndSave;
     private System.Windows.Forms.Button btnBrowseEnc;
     private System.Windows.Forms.GroupBox groupBox3;
-    private System.Windows.Forms.RadioButton radioButton2;
+    private System.Windows.Forms.RadioButton rbSampleExportFile;
     private System.Windows.Forms.RadioButton rbSingleFile;
     private System.Windows.Forms.RadioButton rbBlackBox;
+    private System.Windows.Forms.RadioButton rbSelfTestFile;
   }
 }
 

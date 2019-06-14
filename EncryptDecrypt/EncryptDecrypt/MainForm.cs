@@ -42,6 +42,7 @@ namespace EncryptDecrypt
     {
       rtbResult.Clear();
 
+      //Decrypt a single encrypted file
       if (rbSingleFile.Checked)
       {
         SaveFileDialog dialog = new SaveFileDialog();
@@ -49,27 +50,68 @@ namespace EncryptDecrypt
 
         if (dialog.ShowDialog() != DialogResult.Cancel)
         {
-          if (DecryptSingleFile(dialog.FileName, fileName))
+          if (DecryptionHelper.DecryptSingleFile(dialog.FileName, fileName))
           {
             rtbResult.AppendText($"{fileName} was successfully decrypted and saved as {dialog.FileName}.");
           }
         }
       }
+      //Decrypt Blackbox files from MilkoStream.
       else if (rbBlackBox.Checked)
       {
         SaveFileDialog dialog = new SaveFileDialog();
         dialog.Filter = "Text files|*.txt";
         if (dialog.ShowDialog() != DialogResult.Cancel)
         {
-          Decompress(dialog.FileName, fileName);
+          DecrompressionHelper.Decompress(dialog.FileName, fileName);
         }
       }
-      else
+      //Decrypt a sample export file from Mosaic
+      else if (rbSampleExportFile.Checked)
       {
         helper = new DataFileHelper(fileName);
         destinationfolder = Path.Combine(Path.GetDirectoryName(fileName), "DecryptedRawFiles");
         DecryptSamplesFromDataFile();
-        DecryptSettingsFilesFromDataFile();
+        DecryptSettingsFilesFromDataFile(false);
+      }
+      //Decrypt a selftest that is exported from Mosaic
+      else
+      {
+        helper = new DataFileHelper(fileName, true);
+        destinationfolder = Path.Combine(Path.GetDirectoryName(fileName), "DecryptedRawFiles");
+        DecryptSelfTestFromDataFile();
+        DecryptSettingsFilesFromDataFile(true);
+      }
+    }
+
+    private void DecryptSelfTestFromDataFile()
+    {
+      List<SelfTestContent> selfTests = helper.GetSelfTests();
+
+      if (!Directory.Exists(destinationfolder))
+      {
+        Directory.CreateDirectory(destinationfolder);
+      }
+
+      foreach (var selfTest in selfTests)
+      {
+        foreach (var rawDataContent in selfTest.RawDataContents)
+        {
+          string decryptedFileName = $"{selfTest}_{rawDataContent}.xml";
+          string decryptedFilePathName = Path.Combine(destinationfolder, decryptedFileName);
+          string readFileName = Path.Combine(Path.GetDirectoryName(fileName), rawDataContent.DataFileName);
+          
+          bool copyFile = new[] {"NOISE", "SensorList", "STRAY_LIGHT", "PEAKBANDWIDTH", "PEAKBANDWIDTHREPEATABILITY", "PEAKPOSITION", "PEAKPOSITIONREPEATABILITY" }.Contains(rawDataContent.Identification);
+
+          if (copyFile)
+          {
+            CopyFile(readFileName, decryptedFilePathName, decryptedFileName);
+          }
+          else if (DecryptionHelper.DecryptSingleFile(decryptedFilePathName, readFileName))
+          {
+            rtbResult.AppendText($"{decryptedFileName}.xml succesfully decrypted.\n");
+          }
+        }
       }
     }
 
@@ -94,18 +136,16 @@ namespace EncryptDecrypt
           string decryptedFileName = $"{sample}_{sampleRawDataContent}.{extention}";
           string decryptedFilePathName = Path.Combine(destinationfolder, decryptedFileName);
           string readFileName = Path.Combine(Path.GetDirectoryName(fileName), sampleRawDataContent.DataFileName);
-
-          if (sampleRawDataContent.Identification.Equals("JpegPicture") ||
-              sampleRawDataContent.Identification.Equals("ForeignObjectData"))
+          
+          if (new[] { "JpegPicture", "ForeignObjectData" }.Contains(sampleRawDataContent.Identification))
           {
-            File.Copy(readFileName, decryptedFilePathName, true);
-            rtbResult.AppendText($"{decryptedFileName} was copied\n");
+            CopyFile(readFileName, decryptedFilePathName, decryptedFileName);
           }
           else if (sampleRawDataContent.Identification.Equals("ABS_SCAN"))
           {
-            Decompress(decryptedFilePathName, readFileName);
+            DecrompressionHelper.Decompress(decryptedFilePathName, readFileName);
           }
-          else if (DecryptSingleFile(decryptedFilePathName, readFileName))
+          else if (DecryptionHelper.DecryptSingleFile(decryptedFilePathName, readFileName))
           {
             rtbResult.AppendText($"{decryptedFileName}.xml succesfully decrypted.\n");
           }
@@ -113,9 +153,9 @@ namespace EncryptDecrypt
       }
     }
 
-    private void DecryptSettingsFilesFromDataFile()
+    private void DecryptSettingsFilesFromDataFile(bool isSelfTest)
     {
-      var settingFiles = helper.SettingsFileList();
+      var settingFiles = helper.SettingsFileList(isSelfTest);
 
       foreach (var settingFile in settingFiles)
       {
@@ -124,7 +164,7 @@ namespace EncryptDecrypt
 
         if (File.Exists(readFileName))
         {
-          if (DecryptSingleFile(decryptedFileName, readFileName))
+          if (DecryptionHelper.DecryptSingleFile(decryptedFileName, readFileName))
           {
             rtbResult.AppendText($"{settingFile} was successfully decrypted.\n");
           }
@@ -132,48 +172,11 @@ namespace EncryptDecrypt
       }
     }
 
-    private bool DecryptSingleFile(string decryptedFileName, string readFileName)
+
+    private void CopyFile(string readFileName, string decryptedFilePathName, string decryptedFileName)
     {
-      byte[] encBytes = File.ReadAllBytes(readFileName);
-      byte[] decBytes = DecryptionHelper.DecryptFile(encBytes);
-      if (decBytes != null)
-      {
-        File.WriteAllBytes(decryptedFileName, decBytes);
-        return true;
-      }
-
-      return false;
-    }
-
-    private bool DecryptBlackBoxFile(string decryptedFileName, string readFileName)
-    {
-      byte[] encBytes = File.ReadAllBytes(readFileName);
-      byte[] decBytes = DecryptionHelper.DecryptBlackBoxData(encBytes);
-
-      if (decBytes != null)
-      {
-        File.WriteAllBytes(decryptedFileName, decBytes);
-        return true;
-      }
-
-      return false;
-    }
-
-    private void Decompress(string decryptedFileName, string readFileName)
-    {
-      var floats = DecrompressionHelper.Decompress(readFileName);
-
-      StringBuilder builder = new StringBuilder();
-
-      foreach (var f in floats)
-      {
-        builder.Append(f.ToString());
-        builder.Append(";");
-      }
-
-      string[] writeStrings = new[] {builder.ToString()};
-
-      File.WriteAllLines(decryptedFileName, writeStrings);
+      File.Copy(readFileName, decryptedFilePathName, true);
+      rtbResult.AppendText($"{decryptedFileName} was copied\n");
     }
   }
 }
