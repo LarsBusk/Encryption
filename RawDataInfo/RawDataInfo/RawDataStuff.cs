@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,6 +12,8 @@ namespace RawDataInfo
   /// </summary>
   public class RawDataStuff
   {
+    public string FileName;
+
     public int DroppedLines;
 
     public int FlashCount;
@@ -25,10 +28,19 @@ namespace RawDataInfo
 
     public double StdDevSpeed;
 
-    public string Header => "DroppedLines;FlashCount;ReplacedPixels;CameraTemp;XrayTemp;ConveyorSpeed;StdDevSpeed";
+    public string ListSeperator = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator;
 
-    public RawDataStuff(int droppedLines, int flashCount, int replacedPixels, double cameraTemp, double xrayTemp, double conveyorSpeed, double stdDevSpeed)
+    public string Header =>
+      string.Join(ListSeperator, ColumnHeaders);
+
+    public string[] ColumnHeaders =>
+      new []{"FileName", "DroppedLines", "FlashCount", "ReplacedPixels", "CameraTemp", "XrayTemp", "ConveyorSpeed", "StdDevSpeed"};
+
+    public int ColumnCount => ColumnHeaders.Length;
+
+    public RawDataStuff(string fileName, int droppedLines, int flashCount, int replacedPixels, double cameraTemp, double xrayTemp, double conveyorSpeed, double stdDevSpeed)
     {
+      FileName = fileName;
       DroppedLines = droppedLines;
       FlashCount = flashCount;
       ReplacedPixels = replacedPixels;
@@ -40,7 +52,8 @@ namespace RawDataInfo
 
     public override string ToString()
     {
-      return $"{DroppedLines};{FlashCount};{ReplacedPixels};{CameraTemp};{XrayTemp};{ConveyorSpeed};{StdDevSpeed}";
+      return
+        $"{FileName}{ListSeperator}{DroppedLines}{ListSeperator}{FlashCount}{ListSeperator}{ReplacedPixels}{ListSeperator}{CameraTemp}{ListSeperator}{XrayTemp}{ListSeperator}{ConveyorSpeed}{ListSeperator}{StdDevSpeed}";
     }
   }
 }
