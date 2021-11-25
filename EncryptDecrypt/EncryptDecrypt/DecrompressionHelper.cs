@@ -14,20 +14,21 @@ namespace EncryptDecrypt
     public static void Decompress(string decryptedFileName, string readFileName)
     {
       FileStream stream = File.Open(readFileName, FileMode.Open);
-
-      var floats = FloatCompression.Unpack(stream);
-
-      StringBuilder builder = new StringBuilder();
-
-      foreach (var f in floats)
+      float[] floats;
+      if (FloatCompression.TryUnpack(stream, out floats))
       {
-        builder.Append(f.ToString());
-        builder.Append(";");
+        StringBuilder builder = new StringBuilder();
+
+        foreach (var f in floats)
+        {
+          builder.Append(f.ToString());
+          builder.Append(";");
+        }
+
+        string[] writeStrings = new[] {builder.ToString()};
+
+        File.WriteAllLines(decryptedFileName, writeStrings);
       }
-
-      string[] writeStrings = new[] { builder.ToString() };
-
-      File.WriteAllLines(decryptedFileName, writeStrings);
     }
   }
 }

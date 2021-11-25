@@ -328,3 +328,5 @@ ASALocalRun/
 
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
+EncryptDecrypt/EncryptDecrypt/obj
+EncryptDecrypt/EncryptDecrypt/bin

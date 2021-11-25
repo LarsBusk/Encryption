@@ -73,6 +73,9 @@ namespace EncryptDecrypt
         destinationfolder = Path.Combine(Path.GetDirectoryName(fileName), "DecryptedRawFiles");
         DecryptSamplesFromDataFile();
         DecryptSettingsFilesFromDataFile(false);
+
+        XmlHelper.DestinationFolder = destinationfolder;
+        XmlHelper.WriteToCsvFile();
       }
       //Decrypt a selftest that is exported from Mosaic
       else
@@ -178,5 +181,17 @@ namespace EncryptDecrypt
       File.Copy(readFileName, decryptedFilePathName, true);
       rtbResult.AppendText($"{decryptedFileName} was copied\n");
     }
-  }
+
+        private void btnBrowseEnc_Click(object sender, EventArgs e)
+        {
+          OpenFileDialog dialog = new OpenFileDialog();
+
+          if (dialog.ShowDialog() != DialogResult.Cancel)
+          {
+            var data = File.ReadAllBytes(dialog.FileName);
+            var encryptedData = EncryptionHelper.EncryptData(data, 1);
+            File.WriteAllBytes("test.xml", encryptedData);
+          }
+        }
+    }
 }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
 using AsymmetricDecryption;
@@ -17,7 +18,7 @@ namespace EncryptDecrypt
     public static bool DecryptSingleFile(string decryptedFileName, string readFileName)
     {
       byte[] encBytes = File.ReadAllBytes(readFileName);
-      byte[] decBytes = DecryptFile(encBytes);
+      byte[] decBytes = DecryptData(encBytes);
       if (decBytes != null)
       {
         File.WriteAllBytes(decryptedFileName, decBytes);
@@ -27,7 +28,7 @@ namespace EncryptDecrypt
       return false;
     }
 
-    private static byte[] DecryptFile(byte[] encryptedData)
+    private static byte[] DecryptData(byte[] encryptedData)
     {
       if (encryptedData == null)
       {
@@ -77,9 +78,10 @@ namespace EncryptDecrypt
             return null;
         }
       }
-      catch (Exception)
+      catch (Exception e)
       {
-
+        string message = $"Decryption failed \n {e.Message} \n {e.InnerException}";
+        MessageBox.Show(message, "Decryption failed");
       }
 
       return null;

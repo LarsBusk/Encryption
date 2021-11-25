@@ -26,7 +26,7 @@ namespace EncryptDecrypt
     {
       if (RawDataContents.Any(r => r.Identification.Equals(rawDataContent.Identification)))
       {
-        rawDataContent.RawDataNumber++;
+        rawDataContent.RawDataNumber = RawDataContents.Count(r => r.Identification.Equals(rawDataContent.Identification));
       }
 
       RawDataContents.Add(rawDataContent);
