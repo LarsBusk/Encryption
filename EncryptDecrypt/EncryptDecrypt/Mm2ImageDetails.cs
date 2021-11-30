@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EncryptDecrypt
 {
-  public class ImageDetails
+  public class Mm2ImageDetails : IDataDetails
   {
     public double EncoderPosition;
     public int DroppedLines;
@@ -26,7 +26,7 @@ namespace EncryptDecrypt
     public int NumberOfNominalDarkPixels;
     public int NumberOfNominalAirPixels;
 
-    public ImageDetails(double encoderPosition, int droppedLines, int flashCount, int replacedPixels, int nominalSpeed, double meanSpeed,
+    public Mm2ImageDetails(double encoderPosition, int droppedLines, int flashCount, int replacedPixels, int nominalSpeed, double meanSpeed,
       double stdDevSpeed, double cameraTemperature, double xrayVoltage, double xrayVoltageSet, double xrayCurrent, double xrayCurrentSet,
       double xrayTemperature, string cameraSerialNumber, int numberOfImagePixels, int numberOfNominalDarkPixels, int numberOfNominalAirPixels)
     {
