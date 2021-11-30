@@ -67,13 +67,15 @@
     <Compile Include="DecrompressionHelper.cs" />
     <Compile Include="DecryptionHelper.cs" />
     <Compile Include="EncryptionHelper.cs" />
-    <Compile Include="ImageDetails.cs" />
+    <Compile Include="IDataDetails.cs" />
+    <Compile Include="Mm2ImageDetails.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ProFossScanDetail.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RawDataContent.cs" />

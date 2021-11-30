@@ -74,8 +74,11 @@ namespace EncryptDecrypt
         DecryptSamplesFromDataFile();
         DecryptSettingsFilesFromDataFile(false);
 
-        XmlHelper.DestinationFolder = destinationfolder;
-        XmlHelper.WriteToCsvFile();
+        if (instrumentComboBox.Text != "Other")
+        {
+          XmlHelper.DestinationFolder = destinationfolder;
+          XmlHelper.WriteToCsvFile(instrumentComboBox.Text);
+        }
       }
       //Decrypt a selftest that is exported from Mosaic
       else
