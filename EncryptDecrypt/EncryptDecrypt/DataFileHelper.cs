@@ -135,7 +135,7 @@ namespace EncryptDecrypt
             setting.Element(ns + "FileReference").Attribute("FileName").Value);
 
 
-          if (!files.Contains(fileName))
+          if (!files.Contains(fileName) & !fileName.Item2.EndsWith("rpt"))
           {
             files.Add(fileName);
           }
