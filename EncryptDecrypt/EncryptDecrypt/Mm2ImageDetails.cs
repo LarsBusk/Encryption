@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,10 +27,20 @@ namespace EncryptDecrypt
     public int NumberOfNominalDarkPixels;
     public int NumberOfNominalAirPixels;
 
-    public Mm2ImageDetails(double encoderPosition, int droppedLines, int flashCount, int replacedPixels, int nominalSpeed, double meanSpeed,
+    public string FileName
+    {
+      get => Path.GetFileName(this.fileName);
+
+      set => this.fileName = value;
+    }
+
+    private string fileName;
+
+    public Mm2ImageDetails(string fileName, double encoderPosition, int droppedLines, int flashCount, int replacedPixels, int nominalSpeed, double meanSpeed,
       double stdDevSpeed, double cameraTemperature, double xrayVoltage, double xrayVoltageSet, double xrayCurrent, double xrayCurrentSet,
       double xrayTemperature, string cameraSerialNumber, int numberOfImagePixels, int numberOfNominalDarkPixels, int numberOfNominalAirPixels)
     {
+      this.FileName = fileName;
       this.EncoderPosition = encoderPosition;
       this.DroppedLines = droppedLines;
       this.FlashCount = flashCount;
@@ -52,13 +63,13 @@ namespace EncryptDecrypt
     public override string ToString()
     {
       return
-        $"{EncoderPosition};{DroppedLines};{FlashCount};{ReplacedPixels};{NominalSpeed};{MeanSpeed};{StdDevSpeed};{CameraTemperature};{XrayVoltage};{XrayVoltageSet}" +
+        $"{FileName};{EncoderPosition};{DroppedLines};{FlashCount};{ReplacedPixels};{NominalSpeed};{MeanSpeed};{StdDevSpeed};{CameraTemperature};{XrayVoltage};{XrayVoltageSet}" +
         $";{XrayCurrent};{XrayCurrentSet};{XrayTemperature};{CameraSerialNumber};{NumberOfImagePixels};{NumberOfNominalDarkPixels};{NumberOfNominalAirPixels}";
     }
 
     public string Header()
     {
-      return $"EncoderPosition;DroppedLines;FlashCount;ReplacedPixels;NominalSpeed;MeanSpeed;StdDevSpeed;CameraTemperature;XrayVoltage;XrayVoltageSet" +
+      return $"Filename;EncoderPosition;DroppedLines;FlashCount;ReplacedPixels;NominalSpeed;MeanSpeed;StdDevSpeed;CameraTemperature;XrayVoltage;XrayVoltageSet" +
              $";XrayCurrent;XrayCurrentSet;XrayTemperature;CameraSerialNumber;NumberOfImagePixels;NumberOfNominalDarkPixels;NumberOfNominalAirPixels";
     }
   }
