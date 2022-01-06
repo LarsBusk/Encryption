@@ -42,7 +42,7 @@ namespace EncryptDecrypt
       CultureInfo xmlCulture = new CultureInfo("en-US");
       XElement rawScanElement = imageDoc.Root;
 
-      return new Mm2ImageDetails(double.Parse(rawScanElement.Attribute("EncoderPosition").Value, xmlCulture),
+      return new Mm2ImageDetails(imageFile,double.Parse(rawScanElement.Attribute("EncoderPosition").Value, xmlCulture),
         int.Parse(rawScanElement.Attribute("DroppedLines").Value),
         int.Parse(rawScanElement.Attribute("FlashCount").Value),
         int.Parse(rawScanElement.Attribute("ReplacedPixels").Value),
@@ -94,7 +94,7 @@ namespace EncryptDecrypt
 
     private static List<IDataDetails> ImageDetailsList()
     {
-      string[] sampleFiles = Directory.GetFiles(DestinationFolder, "*SAMPLE_SCAN*");
+      string[] sampleFiles = Directory.GetFiles(DestinationFolder, "*_SCAN*");
       List<IDataDetails> imageDetailesList = new List<IDataDetails>();
 
       foreach (var sampleFile in sampleFiles)
