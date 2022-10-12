@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace EncryptDecrypt
+namespace EncryptDecrypt.Containers
 {
-  public class SampleContent
+    public class SampleContent
   {
     public int SampleNumber { get; set; }
     public bool IsSubSample { get; set; }

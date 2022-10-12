@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>EncryptDecrypt</RootNamespace>
     <AssemblyName>EncryptDecryptinator</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -39,14 +40,15 @@
     <Reference Include="AsymmetricEncryption">
       <HintPath>References\AsymmetricEncryption.dll</HintPath>
     </Reference>
-    <Reference Include="FOSS.Nova.Common">
+    <Reference Include="FOSS.Nova.Common, Version=7.3.0.0, Culture=neutral, PublicKeyToken=f27fb549aa8c0ab8, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>References\FOSS.Nova.Common.dll</HintPath>
     </Reference>
     <Reference Include="Foss.Platform.IO.SignalCompression, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Foss.Platform.IO.SignalCompression.1.3.1\lib\net451\Foss.Platform.IO.SignalCompression.dll</HintPath>
     </Reference>
-    <Reference Include="log4net, Version=2.0.11.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <HintPath>..\packages\log4net.2.0.11\lib\net45\log4net.dll</HintPath>
+    <Reference Include="log4net, Version=2.0.14.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.14\lib\net45\log4net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -63,25 +65,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataFileHelper.cs" />
-    <Compile Include="DecrompressionHelper.cs" />
-    <Compile Include="DecryptionHelper.cs" />
-    <Compile Include="EncryptionHelper.cs" />
-    <Compile Include="IDataDetails.cs" />
-    <Compile Include="Mm2ImageDetails.cs" />
+    <Compile Include="Containers\CryptoVersionContent.cs" />
+    <Compile Include="Helpers\DataFileHelper.cs" />
+    <Compile Include="Helpers\DecrompressionHelper.cs" />
+    <Compile Include="Helpers\DecryptionHelper.cs" />
+    <Compile Include="DecryptStatusEventArgs.cs" />
+    <Compile Include="Helpers\EncryptionHelper.cs" />
+    <Compile Include="DataDetails\IDataDetails.cs" />
+    <Compile Include="DataDetails\Mm2ImageDetails.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ProFossScanDetail.cs" />
+    <Compile Include="DataDetails\ProFossScanDetail.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RawDataContent.cs" />
-    <Compile Include="SampleContent.cs" />
-    <Compile Include="SelfTestContent.cs" />
-    <Compile Include="XmlHelper.cs" />
+    <Compile Include="Containers\RawDataContent.cs" />
+    <Compile Include="Containers\SampleContent.cs" />
+    <Compile Include="Containers\SelfTestContent.cs" />
+    <Compile Include="Helpers\XmlHelper.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -115,6 +119,7 @@
   <ItemGroup>
     <Content Include="enigma_T65_icon.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

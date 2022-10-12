@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace EncryptDecrypt
+namespace EncryptDecrypt.DataDetails
 {
-  public class ProFossScanDetail :IDataDetails
+    public class ProFossScanDetail :IDataDetails
   {
     public DateTime ScanDateTime;
     public string DetectorType;

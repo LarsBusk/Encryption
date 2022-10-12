@@ -1,16 +1,14 @@
-﻿using System;
+﻿using EncryptDecrypt.DataDetails;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms.VisualStyles;
 using System.Xml.Linq;
 
-namespace EncryptDecrypt
+namespace EncryptDecrypt.Helpers
 {
-  public class XmlHelper
+    public class XmlHelper
   {
     public static string DestinationFolder;
 

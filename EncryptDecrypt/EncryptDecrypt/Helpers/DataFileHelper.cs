@@ -1,19 +1,16 @@
-﻿using System;
+﻿using EncryptDecrypt.Containers;
+using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using FOSS.Nova.Common.DataAccess.SettingsAccessors;
 
-namespace EncryptDecrypt
+namespace EncryptDecrypt.Helpers
 {
-  /// <summary>
-  /// Class that gets information about rawdata from samples and subsamples and settings files
-  /// from a data export file. The data must be in a subfolder.
-  /// </summary>
-  public class DataFileHelper
+    /// <summary>
+    /// Class that gets information about rawdata from samples and subsamples and settings files
+    /// from a data export file. The data must be in a subfolder.
+    /// </summary>
+    public class DataFileHelper
   {
     private readonly XNamespace ns = "http://foss.dk/Mosaic/Export";
 

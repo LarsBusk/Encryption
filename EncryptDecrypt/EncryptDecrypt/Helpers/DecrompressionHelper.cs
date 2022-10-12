@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Foss.Platform.IO.SignalCompression;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Foss.Platform.IO.SignalCompression;
-using Google.Protobuf;
 
-namespace EncryptDecrypt
+namespace EncryptDecrypt.Helpers
 {
-  public class DecrompressionHelper
+    public class DecrompressionHelper
   {
     public static void Decompress(string decryptedFileName, string readFileName)
     {
