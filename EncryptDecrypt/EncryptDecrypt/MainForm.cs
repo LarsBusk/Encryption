@@ -1,200 +1,138 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+﻿using FOSS.Nova.Common.Encryption;
+using System;
 using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using FOSS.Nova.Common.DataAccess.SettingsAccessors.InstrumentSettings;
-using FOSS.Nova.Common.Encryption;
+using EncryptDecrypt.Containers;
+using EncryptDecrypt.Helpers;
 
 namespace EncryptDecrypt
 {
-  public partial class MainForm : Form
-  {
-    private string fileName;
-
-    private string destinationfolder;
-
-    private DataFileHelper helper;
-
-    public MainForm()
+    public partial class MainForm : Form
     {
-      InitializeComponent();
-    }
+        private string fileName;
+        private byte[] encryptedData;
 
-    private void btnBrowse_Click(object sender, EventArgs e)
-    {
-      OpenFileDialog dialog = new OpenFileDialog();
-      if (dialog.ShowDialog() != DialogResult.Cancel)
-      {
-        fileName = dialog.FileName;
-        lblSelectedFile.Text = fileName;
-        btnDecryptAndSave.Enabled = true;
-      }
-    }
+        private delegate void AppendToRichTextBoxDelegate(string text);
 
-    private void btnDecryptAndSave_Click(object sender, EventArgs e)
-    {
-      rtbResult.Clear();
-
-      //Decrypt a single encrypted file
-      if (rbSingleFile.Checked)
-      {
-        SaveFileDialog dialog = new SaveFileDialog();
-        dialog.Filter = "Xml files|*.xml";
-
-        if (dialog.ShowDialog() != DialogResult.Cancel)
+        public MainForm()
         {
-          if (DecryptionHelper.DecryptSingleFile(dialog.FileName, fileName))
-          {
-            rtbResult.AppendText($"{fileName} was successfully decrypted and saved as {dialog.FileName}.");
-          }
+            InitializeComponent();
+
+            foreach (var cryptoVersionContent in GetCryptoVersionContents())
+            {
+                cbEncryptionVersion.Items.Add(cryptoVersionContent);
+            }
+
+            cbEncryptionVersion.SelectedItem = cbEncryptionVersion.Items[0];
         }
-      }
-      //Decrypt Blackbox files from MilkoStream.
-      else if (rbBlackBox.Checked)
-      {
-        SaveFileDialog dialog = new SaveFileDialog();
-        dialog.Filter = "Text files|*.txt";
-        if (dialog.ShowDialog() != DialogResult.Cancel)
+
+        private void btnBrowse_Click(object sender, EventArgs e)
         {
-          DecrompressionHelper.Decompress(dialog.FileName, fileName);
-        }
-      }
-      //Decrypt a sample export file from Mosaic
-      else if (rbSampleExportFile.Checked)
-      {
-        helper = new DataFileHelper(fileName);
-        destinationfolder = Path.Combine(Path.GetDirectoryName(fileName), "DecryptedRawFiles");
-        DecryptSamplesFromDataFile();
-        DecryptSettingsFilesFromDataFile(false);
+            var dialog = new OpenFileDialog();
+            if (dialog.ShowDialog().Equals(DialogResult.Cancel)) return;
 
-        if (instrumentComboBox.Text != "Other")
+            fileName = dialog.FileName;
+            lblSelectedFile.Text = fileName;
+            btnDecryptAndSave.Enabled = true;
+        }
+
+        private void btnDecryptAndSave_Click(object sender, EventArgs e)
         {
-          XmlHelper.DestinationFolder = destinationfolder;
-          XmlHelper.WriteToCsvFile(instrumentComboBox.Text);
+            rtbResult.Clear();
+            var destinationfolder = Path.Combine(Path.GetDirectoryName(fileName), "DecryptedRawFiles");
+            DecryptionHelper decryptionHelper = new DecryptionHelper(destinationfolder);
+            decryptionHelper.DecryptStatus += DecryptionHelper_DecryptStatus;
+
+            //Decrypt a single encrypted file
+            if (rbSingleFile.Checked)
+            {
+                var dialog = new SaveFileDialog();
+                dialog.Filter = "Xml files|*.xml";
+
+                if (dialog.ShowDialog().Equals(DialogResult.Cancel)) return;
+
+                if (decryptionHelper.DecryptSingleFile(dialog.FileName, fileName))
+                    AppendToRichTextBox($"{fileName} was successfully decrypted and saved as {dialog.FileName}.");
+            }
+
+            //Decrypt Blackbox files from MilkoStream.
+            else if (rbBlackBox.Checked)
+            {
+                var dialog = new SaveFileDialog();
+                dialog.Filter = "Text files|*.txt";
+                if (dialog.ShowDialog().Equals(DialogResult.Cancel)) return;
+
+                DecrompressionHelper.Decompress(dialog.FileName, fileName);
+            }
+
+            //Decrypt a sample export file from Mosaic
+            else if (rbSampleExportFile.Checked)
+            {
+                decryptionHelper.DecryptSamplesFromDataFile(fileName);
+                decryptionHelper.DecryptSettingsFilesFromDataFile(fileName, false);
+
+                if (instrumentComboBox.Text != "Other")
+                {
+                    XmlHelper.DestinationFolder = destinationfolder;
+                    XmlHelper.WriteToCsvFile(instrumentComboBox.Text);
+                }
+            }
+            //Decrypt a selftest that is exported from Mosaic
+            else
+            {
+                decryptionHelper.DecryptSelfTestFromDataFile(fileName);
+                decryptionHelper.DecryptSettingsFilesFromDataFile(fileName, true);
+            }
         }
-      }
-      //Decrypt a selftest that is exported from Mosaic
-      else
-      {
-        helper = new DataFileHelper(fileName, true);
-        destinationfolder = Path.Combine(Path.GetDirectoryName(fileName), "DecryptedRawFiles");
-        DecryptSelfTestFromDataFile();
-        DecryptSettingsFilesFromDataFile(true);
-      }
-    }
 
-    private void DecryptSelfTestFromDataFile()
-    {
-      List<SelfTestContent> selfTests = helper.GetSelfTests();
-
-      if (!Directory.Exists(destinationfolder))
-      {
-        Directory.CreateDirectory(destinationfolder);
-      }
-
-      foreach (var selfTest in selfTests)
-      {
-        foreach (var rawDataContent in selfTest.RawDataContents)
+        private void DecryptionHelper_DecryptStatus(object sender, DecryptStatusEventArgs e)
         {
-          string decryptedFileName = $"{selfTest}_{rawDataContent}.xml";
-          string decryptedFilePathName = Path.Combine(destinationfolder, decryptedFileName);
-          string readFileName = Path.Combine(Path.GetDirectoryName(fileName), rawDataContent.DataFileName);
-          
-          bool copyFile = new[] {"NOISE", "SensorList", "STRAY_LIGHT", "PEAKBANDWIDTH", "PEAKBANDWIDTHREPEATABILITY", "PEAKPOSITION", "PEAKPOSITIONREPEATABILITY" }.Contains(rawDataContent.Identification);
-
-          if (copyFile)
-          {
-            CopyFile(readFileName, decryptedFilePathName, decryptedFileName);
-          }
-          else if (DecryptionHelper.DecryptSingleFile(decryptedFilePathName, readFileName))
-          {
-            rtbResult.AppendText($"{decryptedFileName}.xml succesfully decrypted.\n");
-          }
+            AppendToRichTextBox(e.Message);
         }
-      }
-    }
-
-    private void DecryptSamplesFromDataFile()
-    {
-      List<SampleContent> samples = helper.GetSamples();
-
-      if (!Directory.Exists(destinationfolder))
-      {
-        Directory.CreateDirectory(destinationfolder);
-      }
-
-      int sampleNumber = 0;
-
-      foreach (var sample in samples)
-      {
-        sampleNumber++;
-
-        foreach (var sampleRawDataContent in sample.RawDataContents)
-        {
-          string extention = sampleRawDataContent.Identification.Equals("JpegPicture") ? "jpeg" : "xml";
-          string decryptedFileName = $"{sample}_{sampleRawDataContent}.{extention}";
-          string decryptedFilePathName = Path.Combine(destinationfolder, decryptedFileName);
-          string readFileName = Path.Combine(Path.GetDirectoryName(fileName), sampleRawDataContent.DataFileName);
-          
-          if (new[] { "JpegPicture", "ForeignObjectData" }.Contains(sampleRawDataContent.Identification))
-          {
-            CopyFile(readFileName, decryptedFilePathName, decryptedFileName);
-          }
-          else if (sampleRawDataContent.Identification.Equals("ABS_SCAN"))
-          {
-            DecrompressionHelper.Decompress(decryptedFilePathName, readFileName);
-          }
-          else if (DecryptionHelper.DecryptSingleFile(decryptedFilePathName, readFileName))
-          {
-            rtbResult.AppendText($"{decryptedFileName}.xml succesfully decrypted.\n");
-          }
-        }
-      }
-    }
-
-    private void DecryptSettingsFilesFromDataFile(bool isSelfTest)
-    {
-      var settingFiles = helper.SettingsFileList(isSelfTest);
-
-      foreach (var settingFile in settingFiles)
-      {
-        string readFileName = Path.Combine(Path.GetDirectoryName(fileName), settingFile.Item1, settingFile.Item2);
-        string decryptedFileName = Path.Combine(destinationfolder, settingFile.Item2 + ".xml");
-
-        if (File.Exists(readFileName))
-        {
-          if (DecryptionHelper.DecryptSingleFile(decryptedFileName, readFileName))
-          {
-            rtbResult.AppendText($"{settingFile} was successfully decrypted.\n");
-          }
-        }
-      }
-    }
-
-
-    private void CopyFile(string readFileName, string decryptedFilePathName, string decryptedFileName)
-    {
-      File.Copy(readFileName, decryptedFilePathName, true);
-      rtbResult.AppendText($"{decryptedFileName} was copied\n");
-    }
 
         private void btnBrowseEnc_Click(object sender, EventArgs e)
         {
-          OpenFileDialog dialog = new OpenFileDialog();
+            OpenFileDialog dialog = new OpenFileDialog();
+            CryptoVersion crVersion = ((CryptoVersionContent)cbEncryptionVersion.SelectedItem).CryptoVersion;
 
-          if (dialog.ShowDialog() != DialogResult.Cancel)
-          {
+            if (dialog.ShowDialog().Equals(DialogResult.Cancel)) return;
+
             var data = File.ReadAllBytes(dialog.FileName);
-            var encryptedData = EncryptionHelper.EncryptData(data, 1);
-            File.WriteAllBytes("test.xml", encryptedData);
-          }
+            encryptedData = Helpers.EncryptionHelper.EncryptData(data, crVersion);
+
+            btnEncryptAndSave.Enabled = true;
+        }
+
+        private void btnEncryptAndSave_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+            dialog.Filter = "xml files|*.xml";
+
+            if (dialog.ShowDialog() != DialogResult.Cancel)
+                File.WriteAllBytes(dialog.FileName, encryptedData);
+        }
+
+        private CryptoVersionContent[] GetCryptoVersionContents()
+        {
+            return new CryptoVersionContent[]
+            {
+                new CryptoVersionContent(CryptoVersion.CrV0AsymRaw1, "0"),
+                new CryptoVersionContent(CryptoVersion.CrV3AsymRaw2, "3"),
+                new CryptoVersionContent(CryptoVersion.CrV6SymSettings2, "6")
+            };
+        }
+
+        private void AppendToRichTextBox(string text)
+        {
+            if (rtbResult.InvokeRequired)
+            {
+                AppendToRichTextBoxDelegate d = AppendToRichTextBox;
+                this.Invoke(d, new object[] { text });
+                return;
+            }
+
+            rtbResult.AppendText($"{text}\n");
+            rtbResult.ScrollToCaret();
         }
     }
 }

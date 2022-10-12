@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
-namespace EncryptDecrypt
+namespace EncryptDecrypt.DataDetails
 {
-  public class Mm2ImageDetails : IDataDetails
+    public class Mm2ImageDetails : IDataDetails
   {
     public double EncoderPosition;
     public int DroppedLines;

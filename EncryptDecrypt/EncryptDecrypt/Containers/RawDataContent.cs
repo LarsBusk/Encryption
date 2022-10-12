@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
-namespace EncryptDecrypt
+namespace EncryptDecrypt.Containers
 {
-  /// <summary>
-  /// Class to contain the values of the RawValue element in the exported xml file
-  /// </summary>
-  public class RawDataContent
+    /// <summary>
+    /// Class to contain the values of the RawValue element in the exported xml file
+    /// </summary>
+    public class RawDataContent
   {
     public string Identification { get; }
 
