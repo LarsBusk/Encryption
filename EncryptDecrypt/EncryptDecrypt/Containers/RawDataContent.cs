@@ -15,17 +15,25 @@ namespace EncryptDecrypt.Containers
 
     public int RawDataNumber { get; set; }
 
-    public RawDataContent(string identification, string dataFileName, string pathName, int rawDataNumber = 0)
+    public string ParentName;
+
+    public RawDataContent(string identification, string dataFileName, string pathName, string parentName, int rawDataNumber = 0)
     {
       this.Identification = identification;
       this.DataFileName = Path.Combine(pathName, dataFileName);
       this.PathName = pathName;
       this.RawDataNumber = rawDataNumber;
+      this.ParentName = parentName;
+    }
+
+    public void Decrypt()
+    {
+        
     }
 
     public override string ToString()
     {
-      return $"{Identification}_{RawDataNumber}";
+      return $"{ParentName}_{Identification}_{RawDataNumber}";
     }
   }
 }

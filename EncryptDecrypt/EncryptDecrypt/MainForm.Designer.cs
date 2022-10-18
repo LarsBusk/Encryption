@@ -84,7 +84,8 @@
             this.instrumentComboBox.Items.AddRange(new object[] {
             "Other",
             "MM2",
-            "ProFoss"});
+            "ProFoss",
+            "FT3"});
             this.instrumentComboBox.Location = new System.Drawing.Point(284, 104);
             this.instrumentComboBox.Name = "instrumentComboBox";
             this.instrumentComboBox.Size = new System.Drawing.Size(121, 21);

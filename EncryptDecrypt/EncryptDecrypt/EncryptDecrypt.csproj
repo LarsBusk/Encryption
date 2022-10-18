@@ -34,7 +34,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>enigma_T65_icon.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\enigma_T65_icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AsymmetricEncryption">
@@ -66,10 +66,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Containers\CryptoVersionContent.cs" />
+    <Compile Include="Containers\SubSampleContent.cs" />
+    <Compile Include="DataDetails\FT3DataDetails.cs" />
     <Compile Include="Helpers\DataFileHelper.cs" />
     <Compile Include="Helpers\DecrompressionHelper.cs" />
     <Compile Include="Helpers\DecryptionHelper.cs" />
-    <Compile Include="DecryptStatusEventArgs.cs" />
+    <Compile Include="Events\DecryptStatusEventArgs.cs" />
     <Compile Include="Helpers\EncryptionHelper.cs" />
     <Compile Include="DataDetails\IDataDetails.cs" />
     <Compile Include="DataDetails\Mm2ImageDetails.cs" />
@@ -117,7 +119,7 @@
     <None Include="Resources\Enigma.PNG" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="enigma_T65_icon.ico" />
+    <Content Include="Resources\enigma_T65_icon.ico" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

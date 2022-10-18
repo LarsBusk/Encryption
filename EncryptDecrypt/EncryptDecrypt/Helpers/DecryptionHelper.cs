@@ -1,5 +1,6 @@
 ﻿using AsymmetricDecryption;
 using EncryptDecrypt.Containers;
+using EncryptDecrypt.Events;
 using FOSS.Nova.Common.Encryption;
 using System;
 using System.Collections.Generic;
@@ -13,78 +14,78 @@ namespace EncryptDecrypt.Helpers
 {
     public class DecryptionHelper
     {
-        public event EventHandler<DecryptStatusEventArgs> DecryptStatus; 
+        public event EventHandler<DecryptStatusEventArgs> DecryptStatus;
+        public readonly string DestinationFolder;
 
         private static DataFileHelper helper;
-        private string destinationfolder;
+        
+        private readonly string fileName;
 
-        public DecryptionHelper(string destinationFolder)
+        public DecryptionHelper(string fileName)
         {
-            this.destinationfolder = destinationFolder;
+            this.DestinationFolder =  Path.Combine(Path.GetDirectoryName(fileName),
+                $"{Path.GetFileNameWithoutExtension(fileName)}_DecryptedRawFiles"); 
+            helper = new DataFileHelper(fileName);
+            this.fileName = fileName;
         }
 
         public bool DecryptSingleFile(string decryptedFileName, string readFileName)
         {
             byte[] encBytes = File.ReadAllBytes(readFileName);
             byte[] decBytes = DecryptData(encBytes);
-            if (decBytes != null)
-            {
-                File.WriteAllBytes(decryptedFileName, decBytes);
-                return true;
-            }
+            if (decBytes is null) return false;
 
-            return false;
+            File.WriteAllBytes(decryptedFileName, decBytes);
+            return true;
         }
 
-        public void DecryptSamplesFromDataFile(string dataFileName)
+        public void DecryptSamplesFromDataFile()
         {
-            helper = new DataFileHelper(dataFileName);
             List<SampleContent> samples = helper.GetSamples();
 
-            if (!Directory.Exists(destinationfolder))
+            if (!Directory.Exists(DestinationFolder))
+                Directory.CreateDirectory(DestinationFolder);
+            
+            var rawDataContents = new List<RawDataContent>();
+
+            foreach (var sampleContent in samples)
             {
-                Directory.CreateDirectory(destinationfolder);
+                rawDataContents.AddRange(sampleContent.GetRawData());
             }
 
-            int sampleNumber = 0;
-
-            foreach (var sample in samples)
+            foreach (var rawDataContent in rawDataContents)
             {
-                sampleNumber++;
+                string extention = rawDataContent.Identification.Equals("JpegPicture") ? "jpeg" : "xml";
+                string decryptedFileName = $"{rawDataContent}.{extention}";
+                string decryptedFilePathName = Path.Combine(DestinationFolder, decryptedFileName);
+                string readFileName =
+                    Path.Combine(Path.GetDirectoryName(fileName), rawDataContent.DataFileName);
 
-                foreach (var sampleRawDataContent in sample.RawDataContents)
+                if (new[] { "JpegPicture", "ForeignObjectData" }.Contains(rawDataContent.Identification))
                 {
-                    string extention = sampleRawDataContent.Identification.Equals("JpegPicture") ? "jpeg" : "xml";
-                    string decryptedFileName = $"{sample}_{sampleRawDataContent}.{extention}";
-                    string decryptedFilePathName = Path.Combine(destinationfolder, decryptedFileName);
-                    string readFileName =
-                        Path.Combine(Path.GetDirectoryName(dataFileName), sampleRawDataContent.DataFileName);
-
-                    if (new[] { "JpegPicture", "ForeignObjectData" }.Contains(sampleRawDataContent.Identification))
-                    {
-                        CopyFile(readFileName, decryptedFilePathName, decryptedFileName);
-                    }
-                    else if (sampleRawDataContent.Identification.Equals("ABS_SCAN"))
-                    {
-                        DecrompressionHelper.Decompress(decryptedFilePathName, readFileName);
-                    }
-                    else if (DecryptSingleFile(decryptedFilePathName, readFileName))
-                    {
-                        DecryptStatus.Invoke(this, new DecryptStatusEventArgs($"{decryptedFileName}.xml succesfully decrypted.\n"));
-                    }
+                    CopyFile(readFileName, decryptedFilePathName, decryptedFileName);
+                }
+                else if (rawDataContent.Identification.Equals("ABS_SCAN"))
+                {
+                    DecrompressionHelper.Decompress(decryptedFilePathName, readFileName);
+                }
+                else if (DecryptSingleFile(decryptedFilePathName, readFileName))
+                {
+                    DecryptStatus.Invoke(this,
+                        new DecryptStatusEventArgs($"{decryptedFileName}.xml succesfully decrypted.\n"));
                 }
             }
         }
 
-        public void DecryptSettingsFilesFromDataFile(string fileName, bool isSelfTest)
+        public void DecryptSettingsFilesFromDataFile()
         {
-            var settingFiles = helper.SettingsFileList(isSelfTest);
+            var settingFiles = helper.SettingsFileList();
 
             foreach (var settingFile in settingFiles)
             {
                 string readFileName =
                     Path.Combine(Path.GetDirectoryName(fileName), settingFile.Item1, settingFile.Item2);
-                string decryptedFileName = Path.Combine(destinationfolder, settingFile.Item2 + ".xml");
+                string decryptedFileName = Path.Combine(DestinationFolder, settingFile.Item2 + ".xml");
 
                 if (File.Exists(readFileName))
                 {
@@ -96,14 +97,14 @@ namespace EncryptDecrypt.Helpers
             }
         }
 
-        public void DecryptSelfTestFromDataFile(string fileName)
+        public void DecryptSelfTestFromDataFile()
         {
-            helper = new DataFileHelper(fileName, true);
+            helper = new DataFileHelper(fileName);
             List<SelfTestContent> selfTests = helper.GetSelfTests();
 
-            if (!Directory.Exists(destinationfolder))
+            if (!Directory.Exists(DestinationFolder))
             {
-                Directory.CreateDirectory(destinationfolder);
+                Directory.CreateDirectory(DestinationFolder);
             }
 
             foreach (var selfTest in selfTests)
@@ -111,7 +112,7 @@ namespace EncryptDecrypt.Helpers
                 foreach (var rawDataContent in selfTest.RawDataContents)
                 {
                     string decryptedFileName = $"{selfTest}_{rawDataContent}.xml";
-                    string decryptedFilePathName = Path.Combine(destinationfolder, decryptedFileName);
+                    string decryptedFilePathName = Path.Combine(DestinationFolder, decryptedFileName);
                     string readFileName = Path.Combine(Path.GetDirectoryName(fileName), rawDataContent.DataFileName);
 
                     bool copyFile =
@@ -135,11 +136,8 @@ namespace EncryptDecrypt.Helpers
 
         private static byte[] DecryptData(byte[] encryptedData)
         {
-            if (encryptedData == null)
-            {
-                return null;
-            }
-
+            if (encryptedData is null) return null;
+            
             try
             {
                 XDocument xd;
@@ -197,13 +195,10 @@ namespace EncryptDecrypt.Helpers
             byte[] encryptedBytes = File.ReadAllBytes(readFileName);
             byte[] decryptedBytes = Asymmetric.Decrypt(encryptedBytes);
 
-            if (decryptedBytes != null)
-            {
-                File.WriteAllBytes(decryptedFileName, decryptedBytes);
-                return true;
-            }
+            if (decryptedBytes is null) return false;
 
-            return false;
+            File.WriteAllBytes(decryptedFileName, decryptedBytes);
+            return true;
         }
 
         private void CopyFile(string readFileName, string decryptedFilePathName, string decryptedFileName)
