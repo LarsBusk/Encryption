@@ -5,26 +5,26 @@ using System.Text;
 namespace EncryptDecrypt.Helpers
 {
     public class DecrompressionHelper
-  {
-    public static void Decompress(string decryptedFileName, string readFileName)
     {
-      FileStream stream = File.Open(readFileName, FileMode.Open);
-      float[] floats;
-      if (FloatCompression.TryUnpack(stream, out floats))
-      {
-        StringBuilder builder = new StringBuilder();
-
-        foreach (var f in floats)
+        public static void Decompress(string decryptedFileName, string readFileName)
         {
-          builder.Append(f.ToString());
-          builder.Append(";");
+            using (FileStream stream = File.Open(readFileName, FileMode.Open))
+            {
+                if (!FloatCompression.TryUnpack(stream, out float[] floats)) return;
+
+                StringBuilder builder = new StringBuilder();
+
+                foreach (var f in floats)
+                {
+                    builder.Append(f.ToString());
+                    builder.Append(";");
+                }
+
+                var writeStrings = new[] { builder.ToString() };
+
+                File.WriteAllLines(decryptedFileName, writeStrings);
+            }
         }
-
-        string[] writeStrings = new[] {builder.ToString()};
-
-        File.WriteAllLines(decryptedFileName, writeStrings);
-      }
     }
-  }
 }
 

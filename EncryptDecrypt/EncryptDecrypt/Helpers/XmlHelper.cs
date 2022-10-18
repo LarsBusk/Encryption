@@ -14,14 +14,31 @@ namespace EncryptDecrypt.Helpers
 
     public static void WriteToCsvFile(string instrument)
     {
-      string fileName = instrument == "MM2" ? "RawDataDetails.csv" : "ScanDetails.csv";
+        string fileName = string.Empty;
+        List<IDataDetails> detailsList = new List<IDataDetails>();
+
+        switch (instrument)
+        {
+                case "MM2":
+                    fileName = "RawDataDetails.csv";
+                    detailsList = ImageDetailsList();
+                    break;
+                case "ProFoss":
+                    fileName = "ScanDetails.csv";
+                    detailsList = ProFossScanDetails();
+                    break;
+                case "FT3":
+                    fileName = "SampleDetails.csv";
+                    detailsList = Ft3SampleDetails();
+                    break;
+
+        }
       string csvFileName = Path.Combine(DestinationFolder, fileName);
 
       List<string> builder = new List<string>();
+            
 
-      List<IDataDetails> detailsList = instrument == "MM2" ? ImageDetailsList() : ProFossScanDetails();
-
-      if (detailsList.Count == 0)
+      if (!detailsList.Any())
         return;
       
       builder.Add(detailsList[0].Header());
@@ -90,6 +107,20 @@ namespace EncryptDecrypt.Helpers
       return new ProFossScanDetail(scanDateTime, detType, pcbTemp, scanType, intTime, scanFile, detectorConfiguration);
     }
 
+    private static IDataDetails ReadSampleDetails(string sampleFile)
+    {
+        XNamespace ns = "http://www.w3.org/2001/XMLSchema-instance";
+        XDocument sampleDoc = XDocument.Load(sampleFile);
+        XElement rawScanElement = sampleDoc.Root;
+
+        return new FT3DataDetails(sampleFile,
+            rawScanElement.Attribute("DetectorType").Value,
+            rawScanElement.Attribute("DetectorConfiguration").Value,
+            int.Parse(rawScanElement.Attribute("Gain").Value),
+            int.Parse(rawScanElement.Attribute("ScanTime").Value),
+            int.Parse(rawScanElement.Attribute("SumOf").Value));
+    }
+
     private static List<IDataDetails> ImageDetailsList()
     {
       string[] sampleFiles = Directory.GetFiles(DestinationFolder, "*_SCAN*");
@@ -115,6 +146,13 @@ namespace EncryptDecrypt.Helpers
       }
 
       return scanDetailsList;
+    }
+
+    private static List<IDataDetails> Ft3SampleDetails()
+    {
+        string[] sampleFiles = Directory.GetFiles(DestinationFolder, "*_SAMPLE_*");
+
+        return sampleFiles.Select(s => ReadSampleDetails(s)).ToList();
     }
 
     private static DateTime UnixTimeStampToDateTime(double unixTimeStamp)

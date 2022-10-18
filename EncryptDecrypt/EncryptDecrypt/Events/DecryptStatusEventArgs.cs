@@ -1,4 +1,4 @@
-﻿namespace EncryptDecrypt
+﻿namespace EncryptDecrypt.Events
 {
     public class DecryptStatusEventArgs
     {

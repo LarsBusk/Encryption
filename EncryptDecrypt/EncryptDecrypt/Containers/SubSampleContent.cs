@@ -2,19 +2,20 @@
 
 namespace EncryptDecrypt.Containers
 {
-    public class SampleContent
+    public class SubSampleContent
     {
-        public int SampleNumber;
         public List<RawDataContent> RawDataContents { get; private set; }
+        public List<SubSampleContent> SubSampleList { get; private set; }
 
-        public List<SubSampleContent> SubSampleList;
+        public int SubSampleNumber;
+        public string ParentName;
 
-        public SampleContent(int sampleNumber)
+        public SubSampleContent(int subSampleNumber, string parentName)
         {
             RawDataContents = new List<RawDataContent>();
             SubSampleList = new List<SubSampleContent>();
-
-            this.SampleNumber = sampleNumber;
+            SubSampleNumber = subSampleNumber;
+            ParentName = parentName;
         }
 
 
@@ -34,7 +35,7 @@ namespace EncryptDecrypt.Containers
 
         public override string ToString()
         {
-            return $"Sample_{SampleNumber}_";
+            return $"{ParentName}_SubSample_{SubSampleNumber}_";
         }
     }
 }

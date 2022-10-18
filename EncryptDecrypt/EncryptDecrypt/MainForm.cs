@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Windows.Forms;
 using EncryptDecrypt.Containers;
+using EncryptDecrypt.Events;
 using EncryptDecrypt.Helpers;
 
 namespace EncryptDecrypt
@@ -39,8 +40,19 @@ namespace EncryptDecrypt
         private void btnDecryptAndSave_Click(object sender, EventArgs e)
         {
             rtbResult.Clear();
-            var destinationfolder = Path.Combine(Path.GetDirectoryName(fileName), "DecryptedRawFiles");
-            DecryptionHelper decryptionHelper = new DecryptionHelper(destinationfolder);
+
+            //Decrypt Blackbox files from MilkoStream.
+            if (rbBlackBox.Checked)
+            {
+                var dialog = new SaveFileDialog();
+                dialog.Filter = "Text files|*.txt";
+                if (dialog.ShowDialog().Equals(DialogResult.Cancel)) return;
+
+                DecrompressionHelper.Decompress(dialog.FileName, fileName);
+                return;
+            }
+
+            DecryptionHelper decryptionHelper = new DecryptionHelper(fileName);
             decryptionHelper.DecryptStatus += DecryptionHelper_DecryptStatus;
 
             //Decrypt a single encrypted file
@@ -55,33 +67,23 @@ namespace EncryptDecrypt
                     AppendToRichTextBox($"{fileName} was successfully decrypted and saved as {dialog.FileName}.");
             }
 
-            //Decrypt Blackbox files from MilkoStream.
-            else if (rbBlackBox.Checked)
-            {
-                var dialog = new SaveFileDialog();
-                dialog.Filter = "Text files|*.txt";
-                if (dialog.ShowDialog().Equals(DialogResult.Cancel)) return;
-
-                DecrompressionHelper.Decompress(dialog.FileName, fileName);
-            }
-
             //Decrypt a sample export file from Mosaic
             else if (rbSampleExportFile.Checked)
             {
-                decryptionHelper.DecryptSamplesFromDataFile(fileName);
-                decryptionHelper.DecryptSettingsFilesFromDataFile(fileName, false);
+                decryptionHelper.DecryptSamplesFromDataFile();
+                decryptionHelper.DecryptSettingsFilesFromDataFile();
 
                 if (instrumentComboBox.Text != "Other")
                 {
-                    XmlHelper.DestinationFolder = destinationfolder;
+                    XmlHelper.DestinationFolder = decryptionHelper.DestinationFolder;
                     XmlHelper.WriteToCsvFile(instrumentComboBox.Text);
                 }
             }
             //Decrypt a selftest that is exported from Mosaic
             else
             {
-                decryptionHelper.DecryptSelfTestFromDataFile(fileName);
-                decryptionHelper.DecryptSettingsFilesFromDataFile(fileName, true);
+                decryptionHelper.DecryptSelfTestFromDataFile();
+                decryptionHelper.DecryptSettingsFilesFromDataFile();
             }
         }
 
