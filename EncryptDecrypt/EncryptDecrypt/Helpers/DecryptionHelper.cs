@@ -61,6 +61,8 @@ namespace EncryptDecrypt.Helpers
                 string readFileName =
                     Path.Combine(Path.GetDirectoryName(fileName), rawDataContent.DataFileName);
 
+                DecryptStatus.Invoke(this, new DecryptStatusEventArgs($"Processing {readFileName}.\n"));
+
                 if (new[] { "JpegPicture", "ForeignObjectData" }.Contains(rawDataContent.Identification))
                 {
                     CopyFile(readFileName, decryptedFilePathName, decryptedFileName);
@@ -72,7 +74,7 @@ namespace EncryptDecrypt.Helpers
                 else if (DecryptSingleFile(decryptedFilePathName, readFileName))
                 {
                     DecryptStatus.Invoke(this,
-                        new DecryptStatusEventArgs($"{decryptedFileName}.xml succesfully decrypted.\n"));
+                        new DecryptStatusEventArgs($"{readFileName} was succesfully decrypted, saved as{decryptedFileName}.xml.\n"));
                 }
             }
         }
