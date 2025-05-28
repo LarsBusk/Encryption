@@ -40,7 +40,7 @@ namespace EncryptDecrypt.DataDetails
 
     public override string ToString()
     {
-      return $"{FileName};{ScanDateTime};{DetectorType};{DetectorConfiguration}{PcbTemperature};{ScanType};{IntegrationTime}";
+      return $"{FileName};{ScanDateTime};{DetectorType};{DetectorConfiguration};{PcbTemperature};{ScanType};{IntegrationTime}";
     }
   }
 }

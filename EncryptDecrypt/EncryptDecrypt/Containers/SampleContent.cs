@@ -34,7 +34,7 @@ namespace EncryptDecrypt.Containers
 
         public override string ToString()
         {
-            return $"Sample_{SampleNumber}_";
+            return SampleNumber < 10 ? $"Sample_0{SampleNumber}_" : $"Sample_{SampleNumber}_";
         }
     }
 }

@@ -25,7 +25,7 @@ namespace EncryptDecrypt.Helpers
         {
             this.DestinationFolder =  Path.Combine(Path.GetDirectoryName(fileName),
                 $"{Path.GetFileNameWithoutExtension(fileName)}_DecryptedRawFiles"); 
-            helper = new DataFileHelper(fileName);
+            
             this.fileName = fileName;
         }
 
@@ -41,6 +41,7 @@ namespace EncryptDecrypt.Helpers
 
         public void DecryptSamplesFromDataFile()
         {
+            helper = new DataFileHelper(fileName);
             List<SampleContent> samples = helper.GetSamples();
 
             if (!Directory.Exists(DestinationFolder))
@@ -81,6 +82,7 @@ namespace EncryptDecrypt.Helpers
 
         public void DecryptSettingsFilesFromDataFile()
         {
+            helper = new DataFileHelper(fileName);
             var settingFiles = helper.SettingsFileList();
 
             foreach (var settingFile in settingFiles)

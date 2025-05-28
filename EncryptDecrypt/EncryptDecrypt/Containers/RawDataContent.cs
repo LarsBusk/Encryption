@@ -33,7 +33,7 @@ namespace EncryptDecrypt.Containers
 
     public override string ToString()
     {
-      return $"{ParentName}_{Identification}_{RawDataNumber}";
+      return RawDataNumber < 10 ? $"{ParentName}_{Identification}_0{RawDataNumber}" : $"{ParentName}_{Identification}_{RawDataNumber}";
     }
   }
 }
